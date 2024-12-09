@@ -22,30 +22,28 @@ fun Application.authRoutesWithBootstrap(playerDatastore: PlayerDatastore) {
                 }
                 body {
                     div(classes = "container mt-5") {
-                        h1(classes = "mb-4") { +"Sign Up" }
+                        h1(classes = "mb-4") { +"Регистрация" }
                         form(action = "/sign_up", method = FormMethod.post, classes = "needs-validation") {
                             div(classes = "mb-3") {
-                                label(classes = "form-label") { +"Login:" }
+                                label(classes = "form-label") { +"Логин:" }
                                 textInput(name = "login") {
                                     classes = setOf("form-control")
                                 }
                             }
                             div(classes = "mb-3") {
-                                label(classes = "form-label") { +"Password:" }
+                                label(classes = "form-label") { +"Пароль:" }
                                 passwordInput(name = "password") {
                                     classes = setOf("form-control")
                                 }
                             }
-                            div(classes = "form-check mb-3") {
-                                checkBoxInput(name = "isAdmin") {
-                                    classes = setOf("form-check-input")
-                                }
-                                label(classes = "form-check-label") {
-                                    +"Admin"
-                                }
-                            }
                             button(type = ButtonType.submit, classes = "btn btn-primary") {
-                                +"Sign Up"
+                                +"Зарегестрироваться"
+                            }
+                        }
+
+                        div(classes = "mt-3") {
+                            a(href = "/sign_in", classes = "btn btn-secondary") {
+                                +"У меня уже есть аккаунт"
                             }
                         }
                     }
@@ -61,7 +59,8 @@ fun Application.authRoutesWithBootstrap(playerDatastore: PlayerDatastore) {
 
             val newPlayer = ExposedPlayer(login, password, isAdmin)
             val id = playerDatastore.create(newPlayer)
-            call.respondText("User created with ID: $id")
+            UserSession.currentUser = newPlayer
+            call.respondRedirect("/select_entity")
         }
 
         // Sign-in page
@@ -76,19 +75,25 @@ fun Application.authRoutesWithBootstrap(playerDatastore: PlayerDatastore) {
                         h1(classes = "mb-4") { +"Sign In" }
                         form(action = "/sign_in", method = FormMethod.post, classes = "needs-validation") {
                             div(classes = "mb-3") {
-                                label(classes = "form-label") { +"Login:" }
+                                label(classes = "form-label") { +"Логин:" }
                                 textInput(name = "login") {
                                     classes = setOf("form-control")
                                 }
                             }
                             div(classes = "mb-3") {
-                                label(classes = "form-label") { +"Password:" }
+                                label(classes = "form-label") { +"Пароль:" }
                                 passwordInput(name = "password") {
                                     classes = setOf("form-control")
                                 }
                             }
                             button(type = ButtonType.submit, classes = "btn btn-primary") {
-                                +"Sign In"
+                                +"Войти"
+                            }
+                        }
+
+                        div(classes = "mt-3") {
+                            a(href = "/sign_up", classes = "btn btn-secondary") {
+                                +"Создать аккаунт"
                             }
                         }
                     }

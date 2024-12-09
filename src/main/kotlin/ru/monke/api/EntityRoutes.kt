@@ -73,7 +73,7 @@ fun HTML.entityListPage(entityType: String, entities: List<Any>) {
                                 h5(classes = "card-title") {
                                     when (entity) {
                                         is ExposedCity -> +entity.name
-                                       // is ExposedUnit -> +entity.name
+                                        is ExposedUnit -> +entity.name
                                         is ExposedBuilding -> +entity.name
                                         is ExposedDistrict -> +"District #${entity.name}"
                                     }
@@ -81,7 +81,7 @@ fun HTML.entityListPage(entityType: String, entities: List<Any>) {
                                 p(classes = "card-text") {
                                     when (entity) {
                                         is ExposedCity -> +"Population: ${entity.population}"
-                                       // is ExposedUnit -> +"Damage: ${entity.damage}, Health: ${entity.health}"
+                                        is ExposedUnit -> +"Damage: ${entity.damage}, Health: ${entity.health}"
                                         is ExposedBuilding -> +"Production: ${entity.production}, Defense: ${entity.defense}"
                                         is ExposedDistrict -> +"Production Cost: ${entity.productionCost}"
                                     }

@@ -5,10 +5,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.exposed.sql.Database
-import ru.monke.api.authRoutesWithBootstrap
-import ru.monke.api.detailsRoutes
-import ru.monke.api.entityRoutes
-import ru.monke.api.entitySelectionRoutes
+import ru.monke.api.*
 import ru.monke.database.*
 import ru.yandex.qatools.embed.postgresql.EmbeddedPostgres
 import ru.yandex.qatools.embed.postgresql.util.SocketUtil
@@ -48,6 +45,13 @@ fun Application.configureRouting() {
         districtDatastore = districtDatastore,
         unitDatastore = unitDatastore
     )
+
+    creatingRoutes(
+        cityDatastore = cityDatastore,
+        buildingDatastore = buildingDatastore,
+        districtDatastore = districtDatastore,
+        unitDatastore = unitDatastore
+    )
 }
 
 fun connectToPostgres(): Database {
@@ -78,6 +82,7 @@ private suspend fun fillMockData(
         isAdmin = true
     )
     val id = playerDatastore.create(player1)
+    UserSession.currentUser = player1
     val city1 = ExposedCity(
         name = "Moscow",
         playerId = id,

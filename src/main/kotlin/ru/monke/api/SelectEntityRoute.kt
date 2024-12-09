@@ -2,12 +2,16 @@ package ru.monke.api
 
 import io.ktor.server.application.*
 import io.ktor.server.html.*
+import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.html.*
 
 fun Application.entitySelectionRoutes() {
     routing {
         get("/select_entity") {
+            if (UserSession.currentUser == null) {
+                call.respondRedirect("/sign_in")
+            }
             call.respondHtml {
                 head {
                     title { +"Select Entity" }
