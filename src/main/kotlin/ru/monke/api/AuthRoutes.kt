@@ -105,9 +105,24 @@ fun Application.authRoutesWithBootstrap(playerDatastore: PlayerDatastore) {
             val player = playerDatastore.read(login)
 
             if (player != null && player.password == password) {
-                call.respondText("Welcome, ${player.login}!")
+                UserSession.currentUser = player
+                call.respondRedirect("/select_entity")
             } else {
-                call.respondText("Invalid credentials", status = HttpStatusCode.Unauthorized)
+                call.respondHtml(HttpStatusCode.Unauthorized) {
+                    head {
+                        title("Login Error")
+                        link(rel = "stylesheet", href = "https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css")
+                    }
+                    body {
+                        div("container mt-5") {
+                            div("card p-4 bg-light") {
+                                h1("text-danger") { +"Invalid Credentials" }
+                                p { +"The login or password you entered is incorrect. Please try again." }
+                                a(href = "/sign_in", classes = "btn btn-primary mt-2") { +"Go back to login" }
+                            }
+                        }
+                    }
+                }
             }
         }
     }

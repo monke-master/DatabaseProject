@@ -9,14 +9,17 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 @Serializable
 data class ExposedDistrict(
+    val id: Int = 0,
     val cityId: Int,
+    val name: String,
     val productionCost: Int,
 )
 
-class DistrictDatabase(database: Database) {
+class DistrictDatastore(database: Database) {
 
     object Districts : IntIdTable("District") {
         val cityId = reference("city_id", CityDatastore.Cities)
+        val name = varchar("name", 200)
         val productionCost = integer("production_cost")
     }
 
@@ -29,6 +32,7 @@ class DistrictDatabase(database: Database) {
     suspend fun create(district: ExposedDistrict): Int = dbQuery {
         Districts.insert {
             it[cityId] = district.cityId
+            it[name] = district.name
             it[productionCost] = district.productionCost
         }[Districts.id].value
     }
@@ -38,10 +42,23 @@ class DistrictDatabase(database: Database) {
             Districts.selectAll()
                 .where { Districts.id eq id}
                 .map { ExposedDistrict(
+                    id = id,
                     cityId = it[Districts.cityId].value,
+                    name = it[Districts.name],
                     productionCost = it[Districts.productionCost],
                 ) }
                 .singleOrNull()
+        }
+    }
+
+    suspend fun getAllDistricts(): List<ExposedDistrict> = dbQuery {
+        Districts.selectAll().map {
+            ExposedDistrict(
+                id = it[Districts.id].value,
+                cityId = it[Districts.cityId].value,
+                productionCost = it[Districts.productionCost],
+                name = it[Districts.name],
+            )
         }
     }
 
@@ -49,11 +66,11 @@ class DistrictDatabase(database: Database) {
         dbQuery {
             Districts.update({ Districts.id eq id}) {
                 it[cityId] = district.cityId
+                it[name] = district.name
                 it[productionCost] = district.productionCost
             }
         }
     }
-
 
     suspend fun delete(id: Int) {
         dbQuery {

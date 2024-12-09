@@ -8,6 +8,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 @Serializable
 data class ExposedCity(
+    val id: Int = 0,
     val playerId: Int,
     val name: String,
     val population: Int
@@ -24,7 +25,6 @@ class CityDatastore(database: Database) {
     init {
         transaction(database) {
             SchemaUtils.create(Cities)
-
         }
     }
 
@@ -41,11 +41,23 @@ class CityDatastore(database: Database) {
             Cities.selectAll()
                 .where { Cities.id eq id}
                 .map { ExposedCity(
+                    id = id,
                     playerId = it[Cities.playerId].value,
                     name = it[Cities.name],
                     population = it[Cities.population],
                 ) }
                 .singleOrNull()
+        }
+    }
+
+    suspend fun getAllCities(): List<ExposedCity> = dbQuery {
+        Cities.selectAll().map {
+            ExposedCity(
+                id = it[Cities.id].value,
+                playerId = it[Cities.playerId].value,
+                name = it[Cities.name],
+                population = it[Cities.population]
+            )
         }
     }
 

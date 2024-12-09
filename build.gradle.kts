@@ -21,6 +21,7 @@ repositories {
 }
 
 dependencies {
+    implementation("ru.yandex.qatools.embed:postgresql-embedded:2.10")
     implementation(libs.koin.ktor)
     implementation(libs.koin.logger.slf4j)
     implementation(libs.ktor.server.core)

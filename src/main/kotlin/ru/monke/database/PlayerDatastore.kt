@@ -16,7 +16,7 @@ data class ExposedPlayer(
 class PlayerDatastore(database: Database) {
 
     object Players : IntIdTable("Player") {
-        val login = varchar("login", 100).uniqueIndex()
+        val login = varchar("login", 100)
         val password = varchar("password", 100)
         val isAdmin = bool("is_admin")
     }

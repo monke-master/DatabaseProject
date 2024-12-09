@@ -8,6 +8,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 @Serializable
 data class ExposedBuilding(
+    val id: Int = 0,
     val districtId: Int,
     val cityId: Int,
     val name: String,
@@ -22,7 +23,7 @@ data class ExposedBuilding(
 class BuildingDatastore(database: Database) {
 
     object Buildings : IntIdTable("Building") {
-        val districtId = reference("district_id", DistrictDatabase.Districts)
+        val districtId = reference("district_id", DistrictDatastore.Districts)
         val cityId = reference("city_id", CityDatastore.Cities)
         val production = integer("production")
         val productionCost = integer("production_cost")
@@ -40,7 +41,7 @@ class BuildingDatastore(database: Database) {
     }
 
     suspend fun create(building: ExposedBuilding): Int = dbQuery {
-        Buildings.insert {
+        Buildings.insertIgnore {
             it[districtId] = building.districtId
             it[cityId] = building.cityId
             it[production] = building.production
@@ -51,6 +52,23 @@ class BuildingDatastore(database: Database) {
             it[description] = building.description
             it[defense] = building.defense
         }[Buildings.id].value
+    }
+
+    suspend fun getAllBuildings(): List<ExposedBuilding> = dbQuery {
+        Buildings.selectAll().map {
+            ExposedBuilding(
+                id = it[Buildings.id].value,
+                districtId = it[Buildings.districtId].value,
+                cityId = it[Buildings.cityId].value,
+                production = it[Buildings.production],
+                productionCost = it[Buildings.productionCost],
+                food = it[Buildings.food],
+                gold = it[Buildings.gold],
+                name = it[Buildings.name],
+                description = it[Buildings.description],
+                defense = it[Buildings.defense]
+            )
+        }
     }
 
     suspend fun read(id: Int): ExposedBuilding? = dbQuery {
