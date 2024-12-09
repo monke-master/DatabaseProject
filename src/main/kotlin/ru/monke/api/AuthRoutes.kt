@@ -104,7 +104,7 @@ fun Application.authRoutesWithBootstrap(playerDatastore: PlayerDatastore) {
             // Check credentials
             val player = playerDatastore.read(login)
 
-            if (player != null) {
+            if (player != null && player.password == password) {
                 call.respondText("Welcome, ${player.login}!")
             } else {
                 call.respondText("Invalid credentials", status = HttpStatusCode.Unauthorized)
