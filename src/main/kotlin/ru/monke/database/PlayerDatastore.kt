@@ -48,6 +48,19 @@ class PlayerDatastore(database: Database) {
         }
     }
 
+    suspend fun read(login: String): ExposedPlayer? {
+        return dbQuery {
+            Players.selectAll()
+                .where { Players.login eq login}
+                .map { ExposedPlayer(
+                    login = it[Players.login],
+                    password = it[Players.password],
+                    isAdmin = it[Players.isAdmin],
+                ) }
+                .singleOrNull()
+        }
+    }
+
     suspend fun update(id: Int, player: ExposedPlayer) {
         dbQuery {
             Players.update({ Players.id eq id}) {
