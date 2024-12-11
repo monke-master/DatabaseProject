@@ -63,7 +63,7 @@ fun HTML.entityListPage(entityType: String, entities: List<Any>) {
                             // Display image if available
                             img(
                                 classes = "card-img-top mx-auto d-block",
-                                src = "/static/images/$entityType.png",
+                                src = getPhotoPath(entity),
                                 alt = "$entityType Image"
                             ) {
                                 attributes["style"] = "width: 40%; height: auto;"
@@ -96,6 +96,14 @@ fun HTML.entityListPage(entityType: String, entities: List<Any>) {
             }
         }
     }
+}
+
+fun getPhotoPath(entity: Any): String = when (entity) {
+    is ExposedCity -> entity.photoPath
+    is ExposedUnit -> entity.photoPath
+    is ExposedBuilding -> entity.photoPath
+    is ExposedDistrict -> entity.photoPath
+    else -> throw IllegalArgumentException("Unknown entity type")
 }
 
 fun getId(entity: Any): Int = when (entity) {

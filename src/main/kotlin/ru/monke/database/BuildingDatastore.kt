@@ -18,6 +18,7 @@ data class ExposedBuilding(
     val food: Int,
     val gold: Int,
     val defense: Int,
+    val photoPath: String
 )
 
 class BuildingDatastore(database: Database) {
@@ -32,6 +33,7 @@ class BuildingDatastore(database: Database) {
         val name = varchar("name", 200)
         val description = varchar("description", 2000)
         val defense = integer("defense")
+        val photoPath = varchar("photo_path", 2000)
     }
 
     init {
@@ -51,6 +53,7 @@ class BuildingDatastore(database: Database) {
             it[name] = building.name
             it[description] = building.description
             it[defense] = building.defense
+            it[photoPath] = building.photoPath
         }[Buildings.id].value
     }
 
@@ -66,7 +69,8 @@ class BuildingDatastore(database: Database) {
                 gold = it[Buildings.gold],
                 name = it[Buildings.name],
                 description = it[Buildings.description],
-                defense = it[Buildings.defense]
+                defense = it[Buildings.defense],
+                photoPath = it[Buildings.photoPath]
             )
         }
     }
@@ -83,7 +87,8 @@ class BuildingDatastore(database: Database) {
                 gold = it[Buildings.gold],
                 name = it[Buildings.name],
                 description = it[Buildings.description],
-                defense = it[Buildings.defense]
+                defense = it[Buildings.defense],
+                photoPath = it[Buildings.photoPath]
             ) }
             .singleOrNull()
     }
@@ -100,6 +105,7 @@ class BuildingDatastore(database: Database) {
                 it[name] = building.name
                 it[description] = description
                 it[defense] = defense
+                it[photoPath] = building.photoPath
             }
         }
     }

@@ -11,7 +11,8 @@ data class ExposedCity(
     val id: Int = 0,
     val playerId: Int,
     val name: String,
-    val population: Int
+    val population: Int,
+    val photoPath: String
 )
 
 class CityDatastore(database: Database) {
@@ -20,6 +21,7 @@ class CityDatastore(database: Database) {
         val playerId = reference("player_id", PlayerDatastore.Players)
         val name = varchar("name", 200)
         val population = integer("population")
+        val photoPath = varchar("photo_path", 2000)
     }
 
     init {
@@ -33,6 +35,7 @@ class CityDatastore(database: Database) {
             it[playerId] = city.playerId
             it[name] = city.name
             it[population] = city.population
+            it[photoPath] = city.photoPath
         }[Cities.id].value
     }
 
@@ -45,6 +48,7 @@ class CityDatastore(database: Database) {
                     playerId = it[Cities.playerId].value,
                     name = it[Cities.name],
                     population = it[Cities.population],
+                    photoPath = it[Cities.photoPath]
                 ) }
                 .singleOrNull()
         }
@@ -56,7 +60,8 @@ class CityDatastore(database: Database) {
                 id = it[Cities.id].value,
                 playerId = it[Cities.playerId].value,
                 name = it[Cities.name],
-                population = it[Cities.population]
+                population = it[Cities.population],
+                photoPath = it[Cities.photoPath]
             )
         }
     }
@@ -67,6 +72,7 @@ class CityDatastore(database: Database) {
                 it[playerId] = city.playerId
                 it[name] = city.name
                 it[population] = city.population
+                it[photoPath] = city.photoPath
             }
         }
     }

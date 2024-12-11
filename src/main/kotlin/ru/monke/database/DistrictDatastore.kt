@@ -13,6 +13,7 @@ data class ExposedDistrict(
     val cityId: Int,
     val name: String,
     val productionCost: Int,
+    val photoPath: String
 )
 
 class DistrictDatastore(database: Database) {
@@ -21,6 +22,7 @@ class DistrictDatastore(database: Database) {
         val cityId = reference("city_id", CityDatastore.Cities)
         val name = varchar("name", 200)
         val productionCost = integer("production_cost")
+        val photoPath = varchar("photo_path", 2000)
     }
 
     init {
@@ -34,6 +36,7 @@ class DistrictDatastore(database: Database) {
             it[cityId] = district.cityId
             it[name] = district.name
             it[productionCost] = district.productionCost
+            it[photoPath] = district.photoPath
         }[Districts.id].value
     }
 
@@ -46,6 +49,7 @@ class DistrictDatastore(database: Database) {
                     cityId = it[Districts.cityId].value,
                     name = it[Districts.name],
                     productionCost = it[Districts.productionCost],
+                    photoPath = it[Districts.photoPath]
                 ) }
                 .singleOrNull()
         }
@@ -58,6 +62,7 @@ class DistrictDatastore(database: Database) {
                 cityId = it[Districts.cityId].value,
                 productionCost = it[Districts.productionCost],
                 name = it[Districts.name],
+                photoPath = it[Districts.photoPath]
             )
         }
     }
@@ -68,6 +73,7 @@ class DistrictDatastore(database: Database) {
                 it[cityId] = district.cityId
                 it[name] = district.name
                 it[productionCost] = district.productionCost
+                it[photoPath] = district.photoPath
             }
         }
     }

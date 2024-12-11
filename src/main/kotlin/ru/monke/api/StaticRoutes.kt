@@ -9,5 +9,8 @@ fun Application.configureStaticFiles() {
         static("/static") {
             resources("static") // This serves all files in `resources/static`
         }
+        static("/uploaded_photos") {
+            files("uploaded_photos") // This serves all files in `resources/static`
+        }
     }
 }

@@ -16,7 +16,8 @@ data class ExposedUnit(
     val description: String,
     val movement: Int,
     val productionCost: Int,
-    val salary: Int
+    val salary: Int,
+    val photoPath: String
 )
 
 class UnitDatastore(database: Database) {
@@ -30,6 +31,7 @@ class UnitDatastore(database: Database) {
         val movement = integer("movement")
         val productionCost = integer("production_cost")
         val salary = integer("salary")
+        val photoPath = varchar("photo_path", 2000)
     }
 
     init {
@@ -48,6 +50,7 @@ class UnitDatastore(database: Database) {
             it[movement] = unit.movement
             it[productionCost] = unit.productionCost
             it[salary] = unit.salary
+            it[photoPath] = unit.photoPath
         }[Units.id].value
     }
 
@@ -57,7 +60,6 @@ class UnitDatastore(database: Database) {
             .map { ExposedUnit(
                 id = id,
                 playerId = it[Units.playerId].value,
-
                 damage = it[Units.damage],
                 name = it[Units.name],
                 health = it[Units.health],
@@ -65,6 +67,7 @@ class UnitDatastore(database: Database) {
                 movement = it[Units.movement],
                 productionCost = it[Units.productionCost],
                 salary = it[Units.salary],
+                photoPath = it[Units.photoPath]
             ) }
             .singleOrNull()
     }
@@ -80,7 +83,8 @@ class UnitDatastore(database: Database) {
                 movement = it[Units.movement],
                 productionCost = it[Units.productionCost],
                 salary = it[Units.salary],
-                description = it[Units.description]
+                description = it[Units.description],
+                photoPath = it[Units.photoPath]
             )
         }
     }
@@ -93,9 +97,10 @@ class UnitDatastore(database: Database) {
                 it[health] = unit.health
                 it[name] = unit.name
                 it[description] = description
-//                it[movement] = unit.movement
-//                it[productionCost] = unit.productionCost
-//                it[salary] = unit.salary
+                it[movement] = unit.movement
+                it[productionCost] = unit.productionCost
+                it[salary] = unit.salary
+                it[photoPath] = unit.photoPath
             }
         }
     }
