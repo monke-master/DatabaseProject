@@ -8,6 +8,8 @@ import io.ktor.server.routing.*
 import kotlinx.html.*
 import ru.monke.database.*
 
+const val DEFAULT_LIMIT = 3
+
 fun Application.entityRoutes(
     cityDatastore: CityDatastore,
     unitDatastore: UnitDatastore,
@@ -21,13 +23,16 @@ fun Application.entityRoutes(
             )
 
             val filterParams = call.request.queryParameters
+            val page = filterParams["page"]?.toIntOrNull() ?: 1
 
             val entities = when (entityType) {
                 "city" -> {
                     val minPopulation = filterParams["minPopulation"]?.toIntOrNull()
                     val name = filterParams["name"]
 
-                    cityDatastore.getAllCities(minPopulation, name)
+                    val offset = (page - 1) * DEFAULT_LIMIT
+
+                    cityDatastore.getAllCities(minPopulation, name, offset = offset.toLong())
                 }
                 "unit" -> {
                     val playerId = filterParams["playerId"]?.toIntOrNull()
@@ -35,11 +40,14 @@ fun Application.entityRoutes(
                     val minHealth = filterParams["minHealth"]?.toIntOrNull()
                     val minMovement = filterParams["minMovement"]?.toIntOrNull()
 
+                    val offset = (page - 1) * DEFAULT_LIMIT
+
                     unitDatastore.getAllUnits(
                         playerId = playerId,
                         minDamage = minDamage,
                         minMovement = minMovement,
-                        minHealth = minHealth
+                        minHealth = minHealth,
+                        offset = offset.toLong()
                     )
                 }
                 "building" -> {
@@ -47,19 +55,25 @@ fun Application.entityRoutes(
                     val production = filterParams["production"]?.toIntOrNull()
                     val defense = filterParams["defense"]?.toIntOrNull()
 
+                    val offset = (page - 1) * DEFAULT_LIMIT
+
                     buildingDatastore.getAllBuildings(
                         districtId = districtId,
                         minProduction = production,
-                        minDefense = defense
+                        minDefense = defense,
+                        offset = offset.toLong()
                     )
                 }
                 "district" -> {
                     val productionCost = filterParams["productionCost"]?.toIntOrNull()
                     val cityId = filterParams["cityId"]?.toIntOrNull()
 
+                    val offset = (page - 1) * DEFAULT_LIMIT
+
                     districtDatastore.getAllDistricts(
                         minProductionCost = productionCost,
-                        cityId = cityId
+                        cityId = cityId,
+                        offset = offset.toLong()
                     )
                 }
                 else -> return@get call.respondText(
@@ -68,17 +82,18 @@ fun Application.entityRoutes(
             }
 
             call.respondHtml {
-                entityListPage(entityType, entities, filterParams)
+                entityListPage(entityType, entities, filterParams, page)
             }
         }
     }
 }
 
-fun HTML.entityListPage(entityType: String, entities: List<Any>, filterParams: Parameters) {
+fun HTML.entityListPage(entityType: String, entities: List<Any>, filterParams: Parameters, currentPage: Int) {
     head {
         title { +"Entity List - $entityType" }
         link(rel = "stylesheet", href = "https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css")
     }
+
     body {
         div(classes = "container my-4") {
             h1(classes = "mb-4") { +"List of ${entityType.capitalize()}" }
@@ -263,6 +278,93 @@ fun HTML.entityListPage(entityType: String, entities: List<Any>, filterParams: P
                                     +"View Details"
                                 }
                             }
+                        }
+                    }
+                }
+            }
+
+            when (entityType) {
+                "city" -> {
+                    val minPopulation = filterParams["minPopulation"]?.toIntOrNull() ?: 0
+                    val name = filterParams["name"] ?: ""
+
+                    div {
+                        if (currentPage > 1) {
+                            a(href = "/entities/city?page=${currentPage - 1}&limit=$DEFAULT_LIMIT&minPopulation=$minPopulation&name=$name") { +"Пред. страница" }
+                        }
+                        if (entities.size == DEFAULT_LIMIT) {
+                            a(href = "/entities/city?page=${currentPage + 1}&limit=$DEFAULT_LIMIT&minPopulation=$minPopulation&name=$name") { +"След. страница" }
+                        }
+                    }
+                }
+
+                "unit" -> {
+                    val playerId = filterParams["playerId"]?.toIntOrNull()
+                    val minDamage = filterParams["minDamage"]?.toIntOrNull() ?: 0
+                    val minHealth = filterParams["minHealth"]?.toIntOrNull() ?: 0
+                    val minMovement = filterParams["minMovement"]?.toIntOrNull() ?: 0
+
+                    var prevHref = "/entities/unit?page=${currentPage - 1}&limit=$DEFAULT_LIMIT&minDamage=$minDamage&minHealth=$minHealth&minMovement=$minMovement"
+                    var lastHref = "/entities/unit?page=${currentPage + 1}&limit=$DEFAULT_LIMIT&minDamage=$minDamage&minHealth=$minHealth&minMovement=$minMovement"
+
+                    playerId?.let {
+                        prevHref = "$prevHref&playerId=$playerId"
+                        lastHref = "$lastHref&playerId=$playerId"
+                    }
+
+                    div {
+                        if (currentPage > 1) {
+                            a(href = prevHref) { +"Пред. страница" }
+                        }
+                        if (entities.size == DEFAULT_LIMIT) {
+                            a(href = lastHref) { +"След. страница" }
+                        }
+                    }
+
+                }
+
+                "building" -> {
+                    val districtId = filterParams["districtId"]?.toIntOrNull()
+                    val production = filterParams["production"]?.toIntOrNull()
+                    val defense = filterParams["defense"]?.toIntOrNull()
+
+
+                    var prevHref = "/entities/building?page=${currentPage - 1}&limit=$DEFAULT_LIMIT&production=$production&defense=$defense"
+                    var lastHref = "/entities/building?page=${currentPage + 1}&limit=$DEFAULT_LIMIT&production=$production&defense=$defense"
+
+                    districtId?.let {
+                        prevHref = "$prevHref&districtId=$districtId"
+                        lastHref = "$lastHref&districtId=$districtId"
+                    }
+
+                    div {
+                        if (currentPage > 1) {
+                            a(href = prevHref) { +"Пред. страница" }
+                        }
+                        if (entities.size == DEFAULT_LIMIT) {
+                            a(href = lastHref) { +"След. страница" }
+                        }
+                    }
+                }
+
+                "district" -> {
+                    val productionCost = filterParams["productionCost"]?.toIntOrNull()
+                    val cityId = filterParams["cityId"]?.toIntOrNull()
+
+                    var prevHref = "/entities/district?page=${currentPage - 1}&limit=$DEFAULT_LIMIT&productionCost=$productionCost"
+                    var lastHref = "/entities/district?page=${currentPage + 1}&limit=$DEFAULT_LIMIT&productionCost=$productionCost"
+
+                    cityId?.let {
+                        prevHref = "$prevHref&cityId=$cityId"
+                        lastHref = "$lastHref&cityId=$cityId"
+                    }
+
+                    div {
+                        if (currentPage > 1) {
+                            a(href = prevHref) { +"Пред. страница" }
+                        }
+                        if (entities.size == DEFAULT_LIMIT) {
+                            a(href = lastHref) { +"След. страница" }
                         }
                     }
                 }

@@ -4,7 +4,10 @@ import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.greaterEq
 import org.jetbrains.exposed.sql.transactions.transaction
+import ru.monke.api.DEFAULT_LIMIT
+import ru.monke.database.DistrictDatastore.Districts
 
 
 @Serializable
@@ -57,20 +60,38 @@ class DistrictDatastore(database: Database) {
 
     suspend fun getAllDistricts(
         minProductionCost: Int? = null,
-        cityId: Int? = null
+        cityId: Int? = null,
+        offset: Long = 0,
+        limit: Int = DEFAULT_LIMIT
     ): List<ExposedDistrict> = dbQuery {
-        Districts.selectAll().map {
-            ExposedDistrict(
-                id = it[Districts.id].value,
-                cityId = it[Districts.cityId].value,
-                productionCost = it[Districts.productionCost],
-                name = it[Districts.name],
-                photoPath = it[Districts.photoPath]
-            )
-        }.filter {
-            (minProductionCost == null || it.productionCost >= minProductionCost) &&
-                    (cityId == null || it.cityId == cityId)
+        var a = buildList {
+            if (minProductionCost != null) this.add(Districts.productionCost greaterEq minProductionCost)
+            if (cityId != null) this.add(Districts.cityId eq cityId)
         }
+
+        if (a.isEmpty()) return@dbQuery Districts.selectAll()
+            .limit(limit, offset)
+            .map {
+                ExposedDistrict(
+                    id = it[Districts.id].value,
+                    cityId = it[Districts.cityId].value,
+                    productionCost = it[Districts.productionCost],
+                    name = it[Districts.name],
+                    photoPath = it[Districts.photoPath]
+                )
+            }
+        return@dbQuery Districts.selectAll().where {a.reduce { acc, condition -> acc and condition } }
+            .limit(limit, offset)
+            .map {
+                ExposedDistrict(
+                    id = it[Districts.id].value,
+                    cityId = it[Districts.cityId].value,
+                    productionCost = it[Districts.productionCost],
+                    name = it[Districts.name],
+                    photoPath = it[Districts.photoPath]
+                )
+            }
+
     }
 
     suspend fun update(id: Int, district: ExposedDistrict) {

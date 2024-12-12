@@ -4,7 +4,11 @@ import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.greaterEq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import org.jetbrains.exposed.sql.transactions.transaction
+import ru.monke.api.DEFAULT_LIMIT
+import ru.monke.database.CityDatastore.Cities
 
 @Serializable
 data class ExposedCity(
@@ -56,9 +60,32 @@ class CityDatastore(database: Database) {
 
     suspend fun getAllCities(
         minPopulation: Int? = null,
-        name: String? = null
+        name: String? = null,
+        offset: Long = 0,
+        limit: Int = DEFAULT_LIMIT
     ): List<ExposedCity> = dbQuery {
-        Cities.selectAll().map {
+        // Start constructing the query
+        val query = Cities.selectAll().where {
+            // Combine conditions dynamically
+            val condition = mutableListOf<Op<Boolean>>()
+
+            if (minPopulation != null) {
+                condition += (Cities.population greaterEq minPopulation)
+            }
+            if (name != null) {
+                condition += (Cities.name like "%$name%")
+            }
+
+            // If no filters are provided, select everything
+            if (condition.isNotEmpty()) {
+                condition.reduce { acc, c -> acc and c }
+            } else {
+                Op.TRUE // No filters, select everything
+            }
+        }
+            .limit(limit, offset)
+
+        query.map {
             ExposedCity(
                 id = it[Cities.id].value,
                 playerId = it[Cities.playerId].value,
@@ -66,11 +93,9 @@ class CityDatastore(database: Database) {
                 population = it[Cities.population],
                 photoPath = it[Cities.photoPath]
             )
-        }.filter { city ->
-            (minPopulation == null || city.population >= minPopulation) &&
-                    (name == null || city.name.contains(name, ignoreCase = true))
         }
     }
+
     suspend fun update(id: Int, city: ExposedCity) {
         dbQuery {
             Cities.update({ Cities.id eq id}) {

@@ -4,7 +4,9 @@ import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.greaterEq
 import org.jetbrains.exposed.sql.transactions.transaction
+import ru.monke.api.DEFAULT_LIMIT
 import kotlin.math.min
 
 @Serializable
@@ -77,28 +79,52 @@ class UnitDatastore(database: Database) {
         playerId: Int? = null,
         minDamage: Int? = null,
         minHealth: Int? = null,
-        minMovement: Int? = null
+        minMovement: Int? = null,
+        offset: Long = 0,
+        limit: Int = DEFAULT_LIMIT
     ): List<ExposedUnit> = dbQuery {
-        Units.selectAll().map {
-            ExposedUnit(
-                id = it[Units.id].value,
-                playerId = it[Units.playerId].value,
-                damage = it[Units.damage],
-                name = it[Units.name],
-                health = it[Units.health],
-                movement = it[Units.movement],
-                productionCost = it[Units.productionCost],
-                salary = it[Units.salary],
-                description = it[Units.description],
-                photoPath = it[Units.photoPath]
-            )
-        }.filter {
-            (playerId == null || it.playerId == playerId) &&
-            (minHealth == null || it.health >= minHealth) &&
-            (minDamage == null || it.damage >= minDamage) &&
-            (minMovement == null || it.movement >= minMovement)
+        // Build dynamic conditions
+        val queryConditions = mutableListOf<Op<Boolean>>()
+
+        if (playerId != null) {
+            queryConditions += (Units.playerId eq playerId)
         }
+        if (minHealth != null) {
+            queryConditions += (Units.health greaterEq minHealth)
+        }
+        if (minDamage != null) {
+            queryConditions += (Units.damage greaterEq minDamage)
+        }
+        if (minMovement != null) {
+            queryConditions += (Units.movement greaterEq minMovement)
+        }
+
+        // Combine all conditions using AND
+        val combinedCondition = if (queryConditions.isNotEmpty()) {
+            queryConditions.reduce { acc, condition -> acc and condition }
+        } else {
+            Op.TRUE  // No filters applied, select everything
+        }
+
+        // Execute query with filters and pagination
+        Units.selectAll().where { combinedCondition }
+            .limit(limit, offset)
+            .map {
+                ExposedUnit(
+                    id = it[Units.id].value,
+                    playerId = it[Units.playerId].value,
+                    damage = it[Units.damage],
+                    name = it[Units.name],
+                    health = it[Units.health],
+                    movement = it[Units.movement],
+                    productionCost = it[Units.productionCost],
+                    salary = it[Units.salary],
+                    description = it[Units.description],
+                    photoPath = it[Units.photoPath]
+                )
+            }
     }
+
 
     suspend fun update(id: Int, unit: ExposedUnit) {
         dbQuery {

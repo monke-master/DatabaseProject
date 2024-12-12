@@ -4,7 +4,9 @@ import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.greaterEq
 import org.jetbrains.exposed.sql.transactions.transaction
+import ru.monke.api.DEFAULT_LIMIT
 import kotlin.math.min
 
 @Serializable
@@ -58,27 +60,49 @@ class BuildingDatastore(database: Database) {
     suspend fun getAllBuildings(
         districtId: Int? = null,
         minProduction: Int? = null,
-        minDefense: Int? = null
+        minDefense: Int? = null,
+        limit: Int = DEFAULT_LIMIT,
+        offset: Long = 0
     ): List<ExposedBuilding> = dbQuery {
-        Buildings.selectAll().map {
-            ExposedBuilding(
-                id = it[Buildings.id].value,
-                districtId = it[Buildings.districtId].value,
-                production = it[Buildings.production],
-                productionCost = it[Buildings.productionCost],
-                food = it[Buildings.food],
-                gold = it[Buildings.gold],
-                name = it[Buildings.name],
-                description = it[Buildings.description],
-                defense = it[Buildings.defense],
-                photoPath = it[Buildings.photoPath]
-            )
-        }.filter {
-            (districtId == null || it.districtId == districtId) &&
-                (minProduction == null || it.production >= minProduction) &&
-                (minDefense == null || it.defense >= minDefense)
+        // Build dynamic conditions
+        val queryConditions = mutableListOf<Op<Boolean>>()
+
+        if (districtId != null) {
+            queryConditions += (Buildings.districtId eq districtId)
         }
+        if (minProduction != null) {
+            queryConditions += (Buildings.production greaterEq minProduction)
+        }
+        if (minDefense != null) {
+            queryConditions += (Buildings.defense greaterEq minDefense)
+        }
+
+        // Combine all conditions using AND
+        val combinedCondition = if (queryConditions.isNotEmpty()) {
+            queryConditions.reduce { acc, condition -> acc and condition }
+        } else {
+            Op.TRUE  // No filters applied, select everything
+        }
+
+        // Execute the query with filters and pagination
+        Buildings.selectAll().where { combinedCondition }
+            .limit(limit, offset)
+            .map {
+                ExposedBuilding(
+                    id = it[Buildings.id].value,
+                    districtId = it[Buildings.districtId].value,
+                    production = it[Buildings.production],
+                    productionCost = it[Buildings.productionCost],
+                    food = it[Buildings.food],
+                    gold = it[Buildings.gold],
+                    name = it[Buildings.name],
+                    description = it[Buildings.description],
+                    defense = it[Buildings.defense],
+                    photoPath = it[Buildings.photoPath]
+                )
+            }
     }
+
 
     suspend fun read(id: Int): ExposedBuilding? = dbQuery {
         Buildings.selectAll()
