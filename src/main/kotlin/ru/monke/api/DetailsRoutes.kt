@@ -151,9 +151,15 @@ fun HTML.cityDetailsPage(city: ExposedCity) {
                     }
                 }
                 div("card-body") {
+                    if (city.photoPath.isNotEmpty()) {
+                        img(src = city.photoPath, alt = "City Photo", classes = "img-thumbnail mb-3") {
+                            style = "max-width: 300px;"
+                        }
+                    }
                     p { +"City ID: ${city.id}" }
                     p { +"Player ID: ${city.playerId}" }
                     p { +"Population: ${city.population}" }
+                    p { +"Buildings count: ${countBuildings(city.id)}" }
                 }
             }
         }
@@ -182,6 +188,11 @@ fun HTML.unitDetailsPage(unit: ExposedUnit) {
                     }
                 }
                 div("card-body") {
+                    if (unit.photoPath.isNotEmpty()) {
+                        img(src = unit.photoPath, alt = "City Photo", classes = "img-thumbnail mb-3") {
+                            style = "max-width: 300px;"
+                        }
+                    }
                     p { +"Unit ID: ${unit.id}" }
                     p { +"Player ID: ${unit.playerId}" }
                     p { +"Damage: ${unit.damage}" }
@@ -218,6 +229,11 @@ fun HTML.buildingDetailsPage(building: ExposedBuilding) {
                     }
                 }
                 div("card-body") {
+                    if (building.photoPath.isNotEmpty()) {
+                        img(src = building.photoPath, alt = "City Photo", classes = "img-thumbnail mb-3") {
+                            style = "max-width: 300px;"
+                        }
+                    }
                     p { +"Building ID: ${building.id}" }
                     p { +"District ID: ${building.districtId}" }
                     p { +"Production: ${building.production}" }
@@ -254,6 +270,11 @@ fun HTML.districtDetailsPage(district: ExposedDistrict) {
                     }
                 }
                 div("card-body") {
+                    if (district.photoPath.isNotEmpty()) {
+                        img(src = district.photoPath, alt = "City Photo", classes = "img-thumbnail mb-3") {
+                            style = "max-width: 300px;"
+                        }
+                    }
                     p { +"District ID: ${district.id}" }
                     p { +"Name: ${district.name}" }
                     p { +"City ID: ${district.cityId}" }

@@ -18,18 +18,21 @@ fun Application.configureRouting() {
     }
 
     val database = connectToPostgres()
+    DatabaseProvider.database = database
     dropDatabases(database)
-
     val playerDatastore = PlayerDatastore(database)
     val cityDatastore = CityDatastore(database)
     val buildingDatastore = BuildingDatastore(database)
     val districtDatastore = DistrictDatastore(database)
     val unitDatastore = UnitDatastore(database)
+    setupDatabase(database)
+
 
     authRoutesWithBootstrap(playerDatastore)
     entitySelectionRoutes()
     runBlocking {
         fillMockData(playerDatastore, cityDatastore, districtDatastore, buildingDatastore, unitDatastore)
+        createWarDistrict(1, database)
     }
 
     entityRoutes(
