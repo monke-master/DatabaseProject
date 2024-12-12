@@ -23,7 +23,7 @@ data class ExposedUnit(
 class UnitDatastore(database: Database) {
 
     object Units : IntIdTable("Unit") {
-        val playerId = reference("player_id", PlayerDatastore.Players)
+        val playerId = reference("player_id", PlayerDatastore.Players, onDelete = ReferenceOption.CASCADE)
         val damage = integer("damage")
         val health = integer("health")
         val name = varchar("name", 20)

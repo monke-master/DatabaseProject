@@ -24,8 +24,8 @@ data class ExposedBuilding(
 class BuildingDatastore(database: Database) {
 
     object Buildings : IntIdTable("Building") {
-        val districtId = reference("district_id", DistrictDatastore.Districts)
-        val cityId = reference("city_id", CityDatastore.Cities)
+        val districtId = reference("district_id", DistrictDatastore.Districts, onDelete = ReferenceOption.CASCADE)
+        val cityId = reference("city_id", CityDatastore.Cities, onDelete = ReferenceOption.CASCADE)
         val production = integer("production")
         val productionCost = integer("production_cost")
         val food = integer("food")
@@ -79,6 +79,7 @@ class BuildingDatastore(database: Database) {
         Buildings.selectAll()
             .where { Buildings.id eq id}
             .map { ExposedBuilding(
+                id = id,
                 districtId = it[Buildings.districtId].value,
                 cityId = it[Buildings.cityId].value,
                 production = it[Buildings.production],

@@ -19,7 +19,7 @@ data class ExposedDistrict(
 class DistrictDatastore(database: Database) {
 
     object Districts : IntIdTable("District") {
-        val cityId = reference("city_id", CityDatastore.Cities)
+        val cityId = reference("city_id", CityDatastore.Cities, onDelete = ReferenceOption.CASCADE)
         val name = varchar("name", 200)
         val productionCost = integer("production_cost")
         val photoPath = varchar("photo_path", 2000)

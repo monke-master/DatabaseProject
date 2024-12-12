@@ -85,6 +85,49 @@ fun Application.detailsRoutes(
             }
         }
     }
+
+    routing {
+        post("/delete_unit/{id}") {
+            val id = call.parameters["id"]?.toIntOrNull()
+            if (id != null) {
+                unitDatastore.delete(id) // Replace with your datastore's delete logic
+                call.respondRedirect("/entities/unit")
+            } else {
+                call.respond(HttpStatusCode.BadRequest, "Invalid Unit ID")
+            }
+        }
+
+        post("/delete_city/{id}") {
+            val id = call.parameters["id"]?.toIntOrNull()
+            if (id != null) {
+                cityDatastore.delete(id)
+                call.respondRedirect("/entities/city")
+            } else {
+                call.respond(HttpStatusCode.Forbidden, "Permission denied or invalid ID")
+            }
+        }
+
+        post("/delete_building/{id}") {
+            val id = call.parameters["id"]?.toIntOrNull()
+            if (id != null) {
+                buildingDatastore.delete(id)
+                call.respondRedirect("/entities/building")
+            } else {
+                call.respond(HttpStatusCode.Forbidden, "Permission denied or invalid ID")
+            }
+        }
+
+        post("/delete_district/{id}") {
+            val id = call.parameters["id"]?.toIntOrNull()
+            if (id != null) {
+                districtDatastore.delete(id)
+                call.respondRedirect("/entities/district")
+            } else {
+                call.respond(HttpStatusCode.Forbidden, "Permission denied or invalid ID")
+            }
+        }
+
+    }
 }
 
 fun HTML.cityDetailsPage(city: ExposedCity) {
@@ -95,7 +138,18 @@ fun HTML.cityDetailsPage(city: ExposedCity) {
     body {
         div("container mt-5") {
             div("card") {
-                div("card-header") { +"City: ${city.name}" }
+                div("card-header d-flex justify-content-between align-items-center") {
+                    +"City: ${city.name}"
+                    if (UserSession.currentUser?.isAdmin == true) {
+                        div("d-flex gap-2") {
+                            a(href = "/edit_city/${city.id}", classes = "btn btn-warning btn-sm") { +"Edit" }
+                            form(action = "/delete_city/${city.id}", method = FormMethod.post) {
+                                attributes["onsubmit"] = "return confirm('Are you sure you want to delete this city?')"
+                                button(classes = "btn btn-danger btn-sm") { +"Delete" }
+                            }
+                        }
+                    }
+                }
                 div("card-body") {
                     p { +"City ID: ${city.id}" }
                     p { +"Player ID: ${city.playerId}" }
@@ -106,15 +160,27 @@ fun HTML.cityDetailsPage(city: ExposedCity) {
     }
 }
 
+
 fun HTML.unitDetailsPage(unit: ExposedUnit) {
     head {
-        title { +"Unit Details - ${unit.damage}" }
+        title { +"Unit Details - ${unit.name}" }
         link(rel = "stylesheet", href = "https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css")
     }
     body {
         div("container mt-5") {
             div("card") {
-                div("card-header") { +"Unit: ${unit.name}" }
+                div("card-header d-flex justify-content-between align-items-center") {
+                    +"Unit: ${unit.name}"
+                    if (UserSession.currentUser?.isAdmin == true) {
+                        div("d-flex gap-2") {
+                            a(href = "/edit_unit/${unit.id}", classes = "btn btn-warning btn-sm") { +"Edit" }
+                            form(action = "/delete_unit/${unit.id}", method = FormMethod.post) {
+                                attributes["onsubmit"] = "return confirm('Are you sure you want to delete this unit?')"
+                                button(classes = "btn btn-danger btn-sm") { +"Delete" }
+                            }
+                        }
+                    }
+                }
                 div("card-body") {
                     p { +"Unit ID: ${unit.id}" }
                     p { +"Player ID: ${unit.playerId}" }
@@ -130,6 +196,7 @@ fun HTML.unitDetailsPage(unit: ExposedUnit) {
     }
 }
 
+
 fun HTML.buildingDetailsPage(building: ExposedBuilding) {
     head {
         title { +"Building Details - ${building.name}" }
@@ -138,7 +205,18 @@ fun HTML.buildingDetailsPage(building: ExposedBuilding) {
     body {
         div("container mt-5") {
             div("card") {
-                div("card-header") { +"Building: ${building.name}" }
+                div("card-header d-flex justify-content-between align-items-center") {
+                    +"Building: ${building.name}"
+                    if (UserSession.currentUser?.isAdmin == true) {
+                        div("d-flex gap-2") {
+                            a(href = "/edit_building/${building.id}", classes = "btn btn-warning btn-sm") { +"Edit" }
+                            form(action = "/delete_building/${building.id}", method = FormMethod.post) {
+                                attributes["onsubmit"] = "return confirm('Are you sure you want to delete this building?')"
+                                button(classes = "btn btn-danger btn-sm") { +"Delete" }
+                            }
+                        }
+                    }
+                }
                 div("card-body") {
                     p { +"Building ID: ${building.id}" }
                     p { +"City ID: ${building.cityId}" }
@@ -155,6 +233,7 @@ fun HTML.buildingDetailsPage(building: ExposedBuilding) {
     }
 }
 
+
 fun HTML.districtDetailsPage(district: ExposedDistrict) {
     head {
         title { +"District Details - ${district.name}" }
@@ -163,7 +242,18 @@ fun HTML.districtDetailsPage(district: ExposedDistrict) {
     body {
         div("container mt-5") {
             div("card") {
-                div("card-header") { +"District: ${district.name}" }
+                div("card-header d-flex justify-content-between align-items-center") {
+                    +"District: ${district.name}"
+                    if (UserSession.currentUser?.isAdmin == true) {
+                        div("d-flex gap-2") {
+                            a(href = "/edit_district/${district.id}", classes = "btn btn-warning btn-sm") { +"Edit" }
+                            form(action = "/delete_district/${district.id}", method = FormMethod.post) {
+                                attributes["onsubmit"] = "return confirm('Are you sure you want to delete this district?')"
+                                button(classes = "btn btn-danger btn-sm") { +"Delete" }
+                            }
+                        }
+                    }
+                }
                 div("card-body") {
                     p { +"District ID: ${district.id}" }
                     p { +"Name: ${district.name}" }
@@ -174,5 +264,3 @@ fun HTML.districtDetailsPage(district: ExposedDistrict) {
         }
     }
 }
-
-

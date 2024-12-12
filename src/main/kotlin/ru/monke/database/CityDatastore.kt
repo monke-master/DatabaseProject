@@ -18,7 +18,7 @@ data class ExposedCity(
 class CityDatastore(database: Database) {
 
     object Cities : IntIdTable("City") {
-        val playerId = reference("player_id", PlayerDatastore.Players)
+        val playerId = reference("player_id", PlayerDatastore.Players, onDelete = ReferenceOption.CASCADE)
         val name = varchar("name", 200)
         val population = integer("population")
         val photoPath = varchar("photo_path", 2000)
