@@ -55,7 +55,10 @@ class DistrictDatastore(database: Database) {
         }
     }
 
-    suspend fun getAllDistricts(): List<ExposedDistrict> = dbQuery {
+    suspend fun getAllDistricts(
+        minProductionCost: Int? = null,
+        cityId: Int? = null
+    ): List<ExposedDistrict> = dbQuery {
         Districts.selectAll().map {
             ExposedDistrict(
                 id = it[Districts.id].value,
@@ -64,6 +67,9 @@ class DistrictDatastore(database: Database) {
                 name = it[Districts.name],
                 photoPath = it[Districts.photoPath]
             )
+        }.filter {
+            (minProductionCost == null || it.productionCost >= minProductionCost) &&
+                    (cityId == null || it.cityId == cityId)
         }
     }
 

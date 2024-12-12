@@ -5,6 +5,7 @@ import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
+import kotlin.math.min
 
 @Serializable
 data class ExposedUnit(
@@ -72,7 +73,12 @@ class UnitDatastore(database: Database) {
             .singleOrNull()
     }
 
-    suspend fun getAllUnits(): List<ExposedUnit> = dbQuery {
+    suspend fun getAllUnits(
+        playerId: Int? = null,
+        minDamage: Int? = null,
+        minHealth: Int? = null,
+        minMovement: Int? = null
+    ): List<ExposedUnit> = dbQuery {
         Units.selectAll().map {
             ExposedUnit(
                 id = it[Units.id].value,
@@ -86,6 +92,11 @@ class UnitDatastore(database: Database) {
                 description = it[Units.description],
                 photoPath = it[Units.photoPath]
             )
+        }.filter {
+            (playerId == null || it.playerId == playerId) &&
+            (minHealth == null || it.health >= minHealth) &&
+            (minDamage == null || it.damage >= minDamage) &&
+            (minMovement == null || it.movement >= minMovement)
         }
     }
 

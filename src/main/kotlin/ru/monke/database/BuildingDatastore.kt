@@ -5,6 +5,7 @@ import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
+import kotlin.math.min
 
 @Serializable
 data class ExposedBuilding(
@@ -54,7 +55,11 @@ class BuildingDatastore(database: Database) {
         }[Buildings.id].value
     }
 
-    suspend fun getAllBuildings(): List<ExposedBuilding> = dbQuery {
+    suspend fun getAllBuildings(
+        districtId: Int? = null,
+        minProduction: Int? = null,
+        minDefense: Int? = null
+    ): List<ExposedBuilding> = dbQuery {
         Buildings.selectAll().map {
             ExposedBuilding(
                 id = it[Buildings.id].value,
@@ -68,6 +73,10 @@ class BuildingDatastore(database: Database) {
                 defense = it[Buildings.defense],
                 photoPath = it[Buildings.photoPath]
             )
+        }.filter {
+            (districtId == null || it.districtId == districtId) &&
+                (minProduction == null || it.production >= minProduction) &&
+                (minDefense == null || it.defense >= minDefense)
         }
     }
 

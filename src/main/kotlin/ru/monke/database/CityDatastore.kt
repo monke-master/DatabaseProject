@@ -54,7 +54,10 @@ class CityDatastore(database: Database) {
         }
     }
 
-    suspend fun getAllCities(): List<ExposedCity> = dbQuery {
+    suspend fun getAllCities(
+        minPopulation: Int? = null,
+        name: String? = null
+    ): List<ExposedCity> = dbQuery {
         Cities.selectAll().map {
             ExposedCity(
                 id = it[Cities.id].value,
@@ -63,9 +66,11 @@ class CityDatastore(database: Database) {
                 population = it[Cities.population],
                 photoPath = it[Cities.photoPath]
             )
+        }.filter { city ->
+            (minPopulation == null || city.population >= minPopulation) &&
+                    (name == null || city.name.contains(name, ignoreCase = true))
         }
     }
-
     suspend fun update(id: Int, city: ExposedCity) {
         dbQuery {
             Cities.update({ Cities.id eq id}) {
