@@ -142,7 +142,7 @@ fun HTML.cityDetailsPage(city: ExposedCity) {
                     +"City: ${city.name}"
                     if (UserSession.currentUser?.isAdmin == true) {
                         div("d-flex gap-2") {
-                            a(href = "/edit_city/${city.id}", classes = "btn btn-warning btn-sm") { +"Edit" }
+                            a(href = "/edit/city/${city.id}", classes = "btn btn-warning btn-sm") { +"Edit" }
                             form(action = "/delete_city/${city.id}", method = FormMethod.post) {
                                 attributes["onsubmit"] = "return confirm('Are you sure you want to delete this city?')"
                                 button(classes = "btn btn-danger btn-sm") { +"Delete" }
@@ -173,7 +173,7 @@ fun HTML.unitDetailsPage(unit: ExposedUnit) {
                     +"Unit: ${unit.name}"
                     if (UserSession.currentUser?.isAdmin == true) {
                         div("d-flex gap-2") {
-                            a(href = "/edit_unit/${unit.id}", classes = "btn btn-warning btn-sm") { +"Edit" }
+                            a(href = "/edit/unit/${unit.id}", classes = "btn btn-warning btn-sm") { +"Edit" }
                             form(action = "/delete_unit/${unit.id}", method = FormMethod.post) {
                                 attributes["onsubmit"] = "return confirm('Are you sure you want to delete this unit?')"
                                 button(classes = "btn btn-danger btn-sm") { +"Delete" }
@@ -209,7 +209,7 @@ fun HTML.buildingDetailsPage(building: ExposedBuilding) {
                     +"Building: ${building.name}"
                     if (UserSession.currentUser?.isAdmin == true) {
                         div("d-flex gap-2") {
-                            a(href = "/edit_building/${building.id}", classes = "btn btn-warning btn-sm") { +"Edit" }
+                            a(href = "/edit/building/${building.id}", classes = "btn btn-warning btn-sm") { +"Edit" }
                             form(action = "/delete_building/${building.id}", method = FormMethod.post) {
                                 attributes["onsubmit"] = "return confirm('Are you sure you want to delete this building?')"
                                 button(classes = "btn btn-danger btn-sm") { +"Delete" }
@@ -219,7 +219,6 @@ fun HTML.buildingDetailsPage(building: ExposedBuilding) {
                 }
                 div("card-body") {
                     p { +"Building ID: ${building.id}" }
-                    p { +"City ID: ${building.cityId}" }
                     p { +"District ID: ${building.districtId}" }
                     p { +"Production: ${building.production}" }
                     p { +"Production Cost: ${building.productionCost}" }
@@ -246,7 +245,7 @@ fun HTML.districtDetailsPage(district: ExposedDistrict) {
                     +"District: ${district.name}"
                     if (UserSession.currentUser?.isAdmin == true) {
                         div("d-flex gap-2") {
-                            a(href = "/edit_district/${district.id}", classes = "btn btn-warning btn-sm") { +"Edit" }
+                            a(href = "/edit/district/${district.id}", classes = "btn btn-warning btn-sm") { +"Edit" }
                             form(action = "/delete_district/${district.id}", method = FormMethod.post) {
                                 attributes["onsubmit"] = "return confirm('Are you sure you want to delete this district?')"
                                 button(classes = "btn btn-danger btn-sm") { +"Delete" }

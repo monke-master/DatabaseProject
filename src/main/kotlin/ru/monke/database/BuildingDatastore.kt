@@ -10,7 +10,6 @@ import org.jetbrains.exposed.sql.transactions.transaction
 data class ExposedBuilding(
     val id: Int = 0,
     val districtId: Int,
-    val cityId: Int,
     val name: String,
     val description: String,
     val production: Int,
@@ -25,7 +24,6 @@ class BuildingDatastore(database: Database) {
 
     object Buildings : IntIdTable("Building") {
         val districtId = reference("district_id", DistrictDatastore.Districts, onDelete = ReferenceOption.CASCADE)
-        val cityId = reference("city_id", CityDatastore.Cities, onDelete = ReferenceOption.CASCADE)
         val production = integer("production")
         val productionCost = integer("production_cost")
         val food = integer("food")
@@ -45,7 +43,6 @@ class BuildingDatastore(database: Database) {
     suspend fun create(building: ExposedBuilding): Int = dbQuery {
         Buildings.insertIgnore {
             it[districtId] = building.districtId
-            it[cityId] = building.cityId
             it[production] = building.production
             it[productionCost] = building.productionCost
             it[food] = building.food
@@ -62,7 +59,6 @@ class BuildingDatastore(database: Database) {
             ExposedBuilding(
                 id = it[Buildings.id].value,
                 districtId = it[Buildings.districtId].value,
-                cityId = it[Buildings.cityId].value,
                 production = it[Buildings.production],
                 productionCost = it[Buildings.productionCost],
                 food = it[Buildings.food],
@@ -81,7 +77,6 @@ class BuildingDatastore(database: Database) {
             .map { ExposedBuilding(
                 id = id,
                 districtId = it[Buildings.districtId].value,
-                cityId = it[Buildings.cityId].value,
                 production = it[Buildings.production],
                 productionCost = it[Buildings.productionCost],
                 food = it[Buildings.food],
@@ -98,7 +93,6 @@ class BuildingDatastore(database: Database) {
         dbQuery {
             Buildings.update({ Buildings.id eq id}) {
                 it[districtId] = building.districtId
-                it[cityId] = building.cityId
                 it[production] = building.production
                 it[productionCost] = building.productionCost
                 it[food] = building.food

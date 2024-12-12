@@ -52,6 +52,13 @@ fun Application.configureRouting() {
         districtDatastore = districtDatastore,
         unitDatastore = unitDatastore
     )
+
+    editRoutes(
+        cityDatastore = cityDatastore,
+        buildingDatastore = buildingDatastore,
+        districtDatastore = districtDatastore,
+        unitDatastore = unitDatastore
+    )
 }
 
 fun connectToPostgres(): Database {
@@ -129,7 +136,6 @@ private suspend fun fillMockData(
     val districtId2 = districtDatastore.create(district2)
 
     val building1 = ExposedBuilding(
-        cityId = id1,
         districtId = districtId1,
         name = "Библиоетка",
         defense = 8,

@@ -148,12 +148,6 @@ fun Application.creatingRoutes(
                                 }
                             }
                             div(classes = "mb-3") {
-                                label(classes = "form-label") { +"City ID:" }
-                                textInput(name = "cityId") {
-                                    classes = setOf("form-control")
-                                }
-                            }
-                            div(classes = "mb-3") {
                                 label(classes = "form-label") { +"Building Name:" }
                                 textInput(name = "name") {
                                     classes = setOf("form-control")
@@ -426,7 +420,6 @@ fun Application.creatingRoutes(
                 buildingDatastore.create(
                     ExposedBuilding(
                         districtId = districtId!!.toInt(),
-                        cityId = cityId!!,
                         name = name!!,
                         productionCost = productionCost!!,
                         production = production!!,
@@ -514,19 +507,4 @@ fun Application.creatingRoutes(
     }
 
 
-}
-
-fun savePhotoToFileSystem(photoData: ByteArray?, name: String): String {
-    val directory = File("uploaded_photos")
-    if (!directory.exists()) {
-        directory.mkdirs()
-    }
-
-    val fileName = "$name-${System.currentTimeMillis()}.jpg"
-    val file = File(directory, fileName)
-    photoData?.let {
-        file.writeBytes(it)
-    }
-
-    return "/${file.path}"
 }
